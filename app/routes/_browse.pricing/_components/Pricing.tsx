@@ -1,9 +1,8 @@
 import { useElementSize, useMouse } from "@mantine/hooks";
+import { Form, useNavigation } from "@remix-run/react";
 import { CheckIcon, ShieldCloseIcon } from "lucide-react";
 import { useState } from "react";
 import { type Product } from "~/lib/products";
-// import { stripeRedirect } from "@/actions/stripe-redirect";
-// import PricingButton from "./PricingButton";
 
 interface IPricingItem {
   type: "buy" | "upgrade";
@@ -12,7 +11,9 @@ interface IPricingItem {
 }
 
 export default function PricingItem({ product, type, loggedIn }: IPricingItem) {
-    const pending = false;
+  const navigation = useNavigation();
+  const pending =
+    navigation.formData?.get("proTier") === product.proTier;
   const { ref: circleEl, width, height } = useElementSize();
   const { ref: cardEl, x, y } = useMouse();
 
@@ -70,7 +71,7 @@ export default function PricingItem({ product, type, loggedIn }: IPricingItem) {
           Pay once. <strong>Unlock forever!</strong>
         </p>
 
-        <form>
+        <Form method="post">
           <button
             name="proTier"
             value={product.proTier}
@@ -94,7 +95,7 @@ export default function PricingItem({ product, type, loggedIn }: IPricingItem) {
               </a>
             )}
           </button>
-        </form>
+        </Form>
 
         <ul className="space-y-2">
           {product.benefits.map((benefit: any) => (

@@ -1,7 +1,7 @@
 
-import { getBaseUrl } from "@/lib/helpers";
-import type { Product } from "@/lib/products";
-import { stripe } from "@/lib/stripe";
+import { getBaseUrl } from "~/lib/helpers";
+import type { Product } from "~/lib/products";
+import { stripe } from "~/lib/stripe";
 import type { ProTier } from "@prisma/client";
 import { db } from "./database";
 

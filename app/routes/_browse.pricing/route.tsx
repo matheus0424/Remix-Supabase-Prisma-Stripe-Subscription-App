@@ -1,12 +1,67 @@
 import { getUser } from "~/lib/user.server";
 import PricingItem from "./_components/Pricing";
 import { products } from "~/lib/products";
-import { type LoaderFunctionArgs, json } from "@vercel/remix";
+import {
+  type LoaderFunctionArgs,
+  json,
+  type ActionFunctionArgs,
+  redirect,
+} from "@vercel/remix";
 import { useLoaderData } from "@remix-run/react";
+import {
+  type Metadata,
+  createCheckoutSession,
+  getOrCreateStripeCustomerId,
+} from "~/lib/payment.server";
+import { type ProTier } from "@prisma/client";
 
 export async function loader({ request }: LoaderFunctionArgs) {
   const user = await getUser(request);
   return json({ user });
+}
+
+export async function action({ request }: ActionFunctionArgs) {
+  const data = await request.formData();
+  const user = await getUser(request);
+  const proTier = data.get("proTier");
+
+  if (!user) {
+    return {
+      error: "Unauthorized",
+    };
+  }
+
+  if (!proTier || typeof proTier !== "string") {
+    return {
+      error: "Missing proTier",
+    };
+  }
+
+  const product = products.find((product) => product.proTier === proTier);
+
+  if (!product) {
+    return {
+      error: "Invalid proTier",
+    };
+  }
+
+  const stripeCustomerId = await getOrCreateStripeCustomerId(
+    user.id,
+    user.email
+  );
+
+  const metadata: Metadata = {
+    proTier: proTier as ProTier,
+    userId: user.id,
+  };
+
+  const session = await createCheckoutSession(
+    product,
+    stripeCustomerId,
+    metadata
+  );
+
+  return redirect(session.url as string);
 }
 
 export default function PricingPage() {
