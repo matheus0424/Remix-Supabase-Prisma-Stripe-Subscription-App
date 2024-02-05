@@ -1,6 +1,7 @@
 import { supabase } from "./supabase";
 import { db } from "./database";
 import { accessToken, refreshToken } from "./cookies.server";
+import { redirect } from "@remix-run/node";
 
 export async function getUser(request: Request) {
   try {
@@ -61,6 +62,15 @@ export async function getOrCreateUserForSession(userId: string) {
         proTier: true,
       },
     });
+  }
+  return user;
+}
+
+
+export async function ensureUserIsAdmin(request: Request){
+  const user = await getUser(request);
+  if (!user || user.role !== "ADMIN") {
+    throw redirect("/");
   }
   return user;
 }
