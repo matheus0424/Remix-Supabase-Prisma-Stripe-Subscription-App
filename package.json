@@ -8,7 +8,7 @@
     "dev": "remix dev --manual",
     "start": "remix-serve ./build/index.js",
     "stripe:listen": "stripe listen --forward-to http://localhost:3000/api/payment/stripe-hooks",
-    "typecheck": "tsc"
+    "typecheck": "tsc --noEmit"
   },
   "dependencies": {
     "@mantine/hooks": "^7.5.1",
